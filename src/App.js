@@ -20,14 +20,19 @@ export default function App() {
     const popularSongs = result.items.map((item) => {
       return item.track;
     });
+    console.log(popularSongs);
     setPopularSongs(popularSongs);
     setIsLoading(false);
   }
 
   const handleSongSelected = async (song) => {
     setSelectedSong(song);
-    audioRef.current.src = song.preview_url;
-    playSong();
+    if (song.preview_url != null) {
+      audioRef.current.src = song.preview_url;
+      playSong();
+    } else {
+      pauseSong();
+    }
   }
 
   const playSong = () => {
