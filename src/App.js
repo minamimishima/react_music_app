@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { SongList } from "./components/SongList";
+import { Player } from "./components/Player";
 import spotify from "./lib/spotify";
 
 export default function App() {
   const [ isLoading, setIsLoading ] = useState(false);
   const [ popularSongs, setPopularSongs ] = useState([]);
+  const [ isPlay, setIsPlay ] = useState(false);
+  const [ selectedSong, setSelectedSong ] = useState();
+  const audioRef = useRef(null);
 
   useEffect(() => {
     fetchPopularSongs();
@@ -19,6 +23,30 @@ export default function App() {
     setPopularSongs(popularSongs);
     setIsLoading(false);
   }
+
+  const handleSongSelected = async (song) => {
+    setSelectedSong(song);
+    audioRef.current.src = song.preview_url;
+    playSong();
+  }
+
+  const playSong = () => {
+    audioRef.current.play();
+    setIsPlay(true);
+  }
+
+  const pauseSong = () => {
+    audioRef.current.pause();
+    setIsPlay(false);
+  }
+
+  const toggleSong = () => {
+    if (isPlay) {
+      pauseSong();
+    } else {
+      playSong();
+    }
+  }
   
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -28,9 +56,20 @@ export default function App() {
         </header>
         <section>
           <h2 className="text-2xl font-semibold mb-5">Popular Songs</h2>
-          <SongList isLoading={isLoading} songs={popularSongs}/>
+          <SongList
+            isLoading={isLoading}
+            songs={popularSongs}
+            onSongSelected={handleSongSelected}
+          />
         </section>
       </main>
+      { selectedSong != null && (
+        <Player
+          song={selectedSong}
+          isPlay={isPlay}
+          onButtonClick={toggleSong}/>
+        )}
+      <audio ref={audioRef}></audio>
     </div>
   );
 }
